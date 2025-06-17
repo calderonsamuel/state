@@ -58,6 +58,9 @@ state <- new_class(
   x
 }
 
+#' @export
+`[[<-.state_manager` <- `$<-.state_manager`
+
 set_new_state <- function(x, name, state_obj, types) {
   if (types$has(name)) {
     abort_already_defined(name)
