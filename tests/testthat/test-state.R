@@ -1,7 +1,4 @@
-# Helpers
-int_state <- function(x = 1L) state(x, class_integer)
-chr_state <- function(x = "a") state(x, class_character)
-lgl_state <- function(x = TRUE) state(x, class_logical)
+# ./tests/testthat/test-state.R
 
 test_that("state_manager initializes with named states", {
   sm <- state_manager(x = int_state(1L), y = chr_state("a"))
@@ -26,7 +23,7 @@ test_that("state can be defined after creation", {
   sm$x <- int_state(1L)
   expect_equal(shiny::isolate(sm$x), 1L)
   sm$x <- 5L
-  expect_equal(sm$x, 5L)
+  expect_equal(shiny::isolate(sm$x), 5L)
 })
 
 test_that("assigning raw value without defining state fails", {

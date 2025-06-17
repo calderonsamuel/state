@@ -1,3 +1,5 @@
+# ./state.R
+
 state_manager <- function(...) {
   args <- list2(...)
 
@@ -42,46 +44,70 @@ state <- new_class(
   }
 )
 
-
+#' @export
 `$<-.state_manager` <- function(x, name, value) {
   types <- attr(x, "types")
 
-  if (inherits(value, "state")) {
-    # Prevent overwriting a declared state slot
-    if (types$has(name)) {
-      stop(sprintf("Cannot reassign '%s' with a <state>: it is already defined.", name), call. = FALSE)
-    }
-
-    # Set up a new reactive slot with defined type
-    expected_type <- value@type
-    real_value <- value@value
-
-    types$set(name, expected_type)
-
-    old_class <- class(x)
-    class(x) <- setdiff(old_class, "state_manager")
-    x[[name]] <- real_value
-    class(x) <- old_class
-
+  if (inherits(value, state)) {
+    x <- set_new_state(x, name, value, types)
   } else {
-    # Ensure the type has already been defined
-    if (!types$has(name)) {
-      stop(sprintf("No type defined for '%s'. Assign a <state> object first.", name), call. = FALSE)
-    }
-
-    expected_type <- types$get(name)
-
-    if (!inherits(value, expected_type)) {
-      stop(sprintf("Invalid type for '%s': expected <%s>, got <%s>.",
-                   name, expected_type@class, class(value)[1]), call. = FALSE)
-    }
-
-    old_class <- class(x)
-    class(x) <- setdiff(old_class, "state_manager")
-    x[[name]] <- value
-    class(x) <- old_class
+    x <- update_existing_state(x, name, value, types)
   }
 
   attr(x, "types") <- types
   x
 }
+
+set_new_state <- function(x, name, state_obj, types) {
+  if (types$has(name)) {
+    abort_already_defined(name)
+  }
+
+  types$set(name, state_obj@type)
+
+  with_stripped_class(x, function(x_stripped) {
+    x_stripped[[name]] <- state_obj@value
+    x_stripped
+  }, class(x))
+}
+
+update_existing_state <- function(x, name, value, types) {
+  if (!types$has(name)) {
+    abort_not_defined(name)
+  }
+
+  expected_type <- types$get(name)
+
+  if (!inherits(value, expected_type)) {
+    abort_type_mismatch(name, expected_type, class(value)[1])
+  }
+
+  with_stripped_class(x, function(x_stripped) {
+    x_stripped[[name]] <- value
+    x_stripped
+  }, class(x))
+}
+
+with_stripped_class <- function(x, f, original_class) {
+  class(x) <- setdiff(original_class, "state_manager")
+  x <- f(x)
+  class(x) <- original_class
+  x
+}
+
+abort_already_defined <- function(name) {
+  stop(sprintf("Cannot reassign '%s' with a <state>: it is already defined.", name), call. = FALSE)
+}
+
+abort_not_defined <- function(name) {
+  stop(sprintf("No type defined for '%s'. Assign a <state> object first.", name), call. = FALSE)
+}
+
+abort_type_mismatch <- function(name, expected, actual) {
+  stop(sprintf("Invalid type for '%s': expected <%s>, got <%s>.", name, expected$class, actual), call. = FALSE)
+}
+
+int_state <- function(x = integer()) state(x, class_integer)
+chr_state <- function(x = character()) state(x, class_character)
+lgl_state <- function(x = logical()) state(x, class_logical)
+
