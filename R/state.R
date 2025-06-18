@@ -1,5 +1,3 @@
-# ./state.R
-
 state_manager <- function(...) {
   args <- list2(...)
 
@@ -109,8 +107,3 @@ abort_not_defined <- function(name) {
 abort_type_mismatch <- function(name, expected, actual) {
   stop(sprintf("Invalid type for '%s': expected <%s>, got <%s>.", name, expected$class, actual), call. = FALSE)
 }
-
-int_state <- function(x = integer()) state(x, class_integer)
-chr_state <- function(x = character()) state(x, class_character)
-lgl_state <- function(x = logical()) state(x, class_logical)
-
