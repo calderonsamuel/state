@@ -2,6 +2,8 @@
 
 S3method("$<-",state_manager)
 S3method("[[<-",state_manager)
+export(state)
+export(state_manager)
 if (getRversion() < "4.3.0") importFrom("S7", "@")
 import(S7)
 import(rlang)
