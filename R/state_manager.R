@@ -10,7 +10,7 @@ state_manager <- function(...) {
   args <- list2(...)
 
   if ((length(args) > 0) && (is.null(names(args)) || any(names(args) == ""))) {
-    rlang::abort("All arguments passed to state_manager() must be named.")
+    stop("All arguments passed to state_manager() must be named.")
   }
 
   Map(check_is_state, args, names(args))
@@ -45,7 +45,7 @@ state_manager <- function(...) {
 
 check_is_state <- function(.value, .name) {
   if (!inherits(.value, state)) {
-    rlang::abort(sprintf("`%s` is not a <state> object. Use `state()` when creating typed reactive values.", .name))
+    stop(sprintf("`%s` is not a <state> object. Use `state()` when creating typed reactive values.", .name))
   }
 }
 
