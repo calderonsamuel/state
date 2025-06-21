@@ -109,8 +109,10 @@ test_that("custom S7 class state can be updated", {
 })
 
 test_that("wrong type assignment to custom S7 class fails", {
-  Person <- new_class("Person",
-                      properties = list(name = class_character)
+  Person <- new_class(
+    name = "Person",
+    properties = list(name = class_character),
+    package = NULL
   )
 
   john <- Person(name = "John")
