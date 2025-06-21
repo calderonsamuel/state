@@ -11,18 +11,10 @@ bundled_S3_definitions <- new_union(
 state_classes <- S7_object | bundled_S3_definitions | class_vector
 
 type_to_class_name <- function(type) {
-  class_name <- ""
+  if (!S7_inherits(type)) return(type$class)
+  if (is.null(type@package)) return(type@name)
 
-  if (S7_inherits(type)) {
-    pkg_name <- type@package
-    class_name <- type@name
-    if (!is.null(pkg_name)) {
-      class_name <- paste0(pkg_name, "::", class_name)
-    }
-  } else {
-    class_name <- type$class
-  }
-  class_name
+  paste0(type@package, "::", type@name)
 }
 
 #' State
