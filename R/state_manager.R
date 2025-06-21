@@ -1,3 +1,10 @@
+#' Typed reactiveValues
+#'
+#' A `shiny::reactiveValues` object with type safety features.
+#' All elements must be named and initialized with `state()`
+#'
+#' @inheritParams shiny::reactiveValues
+#'
 #' @export
 state_manager <- function(...) {
   args <- list2(...)
