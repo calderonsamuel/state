@@ -7,9 +7,9 @@
 #'
 #' @export
 state_manager <- function(...) {
-  args <- list2(...)
+  args <- rlang::list2(...)
 
-  if ((length(args) > 0) && (is.null(names(args)) || any(names(args) == ""))) {
+  if (!rlang::is_named2(args)) {
     stop("All arguments passed to state_manager() must be named.")
   }
 
