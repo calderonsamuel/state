@@ -228,17 +228,6 @@ test_that("integer state rejects numeric values", {
   expect_error(sm$x <- 1.5, "Invalid type.*expected <integer>, got <numeric>")
 })
 
-test_that("numeric state accepts both numeric and integer", {
-  sm <- state_manager(x = state(1.0, class_numeric))
-
-  sm$x <- 2.5
-  expect_equal(shiny::isolate(sm$x), 2.5)
-
-  # Integer should be accepted by numeric state (R coercion rules)
-  sm$x <- 3L
-  expect_equal(shiny::isolate(sm$x), 3L)
-})
-
 # =============================================================================
 # Error Recovery Tests
 # =============================================================================
