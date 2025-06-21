@@ -38,7 +38,14 @@ state <- new_class(
   name = "state",
   properties = list(
     value = state_classes,
-    type = state_classes,
+    type = new_property(
+      class = class_any,
+      validator = function(value) {
+        if (!inherits(value, c("S7_object", "S7_S3_class", "S7_base_class"))) {
+          "should be a class supported by S7"
+        }
+      }
+    ),
     allow_null = new_property(
       class = class_logical,
       default = FALSE,

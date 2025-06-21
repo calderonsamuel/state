@@ -5,7 +5,21 @@
 \title{State}
 \usage{
 state(
-  value = NULL,
+  value = (structure(function () 
+ {
+     .Call(S7_object_)
+ }, name = "S7_object",
+    properties = list(), abstract = FALSE, constructor = function () 
+ {
+    
+    .Call(S7_object_)
+ }, validator = function (self) 
+ {
+     if (!is_S7_type(self)) {
+ 
+           "Underlying data is corrupt"
+     }
+ }, class = c("S7_class", "S7_object")))(),
   type = (structure(function () 
  {
      .Call(S7_object_)
