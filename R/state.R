@@ -8,7 +8,7 @@ bundled_S3_definitions <- new_union(
   class_formula
 )
 
-state_classes <- S7_object | bundled_S3_definitions | class_vector
+state_classes <- NULL | S7_object | bundled_S3_definitions | class_vector
 
 type_to_class_name <- function(type) {
   if (!S7_inherits(type)) return(type$class)

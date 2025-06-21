@@ -4,25 +4,7 @@
 \alias{state}
 \title{State}
 \usage{
-state(
-  value = (structure(function () 
- {
-     .Call(S7_object_)
- }, name = "S7_object",
-    properties = list(), abstract = FALSE, constructor = function () 
- {
-    
-    .Call(S7_object_)
- }, validator = function (self) 
- {
-     if (!is_S7_type(self)) {
- 
-           "Underlying data is corrupt"
-     }
- }, class = c("S7_class", "S7_object")))(),
-  type = NULL,
-  allow_null = FALSE
-)
+state(value = NULL, type = NULL, allow_null = FALSE)
 }
 \arguments{
 \item{value}{Initial value of the state}
