@@ -67,7 +67,9 @@ update_existing_state <- function(x, name, value, types) {
 
   expected_type <- types$get(name)
 
-  if (!inherits(value, expected_type)) {
+  expected_type_class <- type_to_class_name(expected_type)
+
+  if (!inherits(value, expected_type_class)) {
     abort_type_mismatch(name, expected_type, class(value)[1])
   }
 
@@ -93,6 +95,6 @@ abort_not_defined <- function(name) {
 }
 
 abort_type_mismatch <- function(name, expected, actual) {
-  expected_class <- if (S7_inherits(expected)) expected@name else expected$class
+  expected_class <- type_to_class_name(expected)
   stop(sprintf("Invalid type for '%s': expected <%s>, got <%s>.", name, expected_class, actual), call. = FALSE)
 }
