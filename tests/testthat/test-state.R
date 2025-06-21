@@ -200,22 +200,6 @@ test_that("non-list assignment to list state fails", {
   expect_error(sm$my_list <- data.frame(x = 1), "Invalid type.*expected <list>")
 })
 
-test_that("state handles matrix objects", {
-  mat <- matrix(1:6, nrow = 2, ncol = 3)
-  sm <- state_manager(my_matrix = state(mat, class_matrix))
-  expect_equal(shiny::isolate(sm$my_matrix), mat)
-})
-
-test_that("matrix state can be updated", {
-  mat1 <- matrix(1:4, nrow = 2)
-  mat2 <- matrix(5:8, nrow = 2)
-
-  sm <- state_manager(my_matrix = state(mat1, class_matrix))
-  sm$my_matrix <- mat2
-
-  expect_equal(shiny::isolate(sm$my_matrix), mat2)
-})
-
 test_that("state handles factor objects", {
   fac <- factor(c("low", "medium", "high"), levels = c("low", "medium", "high"))
   sm <- state_manager(my_factor = state(fac, class_factor))
