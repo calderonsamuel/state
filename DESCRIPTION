@@ -1,9 +1,9 @@
 Package: state
-Title: What the Package Does (One Line, Title Case)
+Title: State Management for Reactive Contexts
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Samuel", "Calderon", , "samuel.calderon@uarm.pe", role = c("aut", "cre"))
+Description: Utilities to define typed reactive values for shiny applications.
 License: MIT + file LICENSE
 Suggests: 
     clipr,
