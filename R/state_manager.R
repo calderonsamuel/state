@@ -6,12 +6,7 @@ state_manager <- function(...) {
     rlang::abort("All arguments passed to state_manager() must be named.")
   }
 
-  withCallingHandlers(
-    purrr::imap(args, check_is_state),
-    purrr_error_indexed = function(err) {
-      rlang::cnd_signal(err$parent)
-    }
-  )
+  Map(check_is_state, args, names(args))
 
   values <- lapply(args, \(x) x@value)
   rv <- shiny::reactiveValues(!!!values)

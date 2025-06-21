@@ -16,7 +16,6 @@ URL: https://github.com/calderonsamuel/state, https://calderonsamuel.github.io/s
 BugReports: https://github.com/calderonsamuel/state/issues
 Imports: 
     fastmap,
-    purrr,
     rlang,
     S7,
     shiny
