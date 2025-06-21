@@ -37,7 +37,7 @@ type_to_class_name <- function(type) {
 state <- new_class(
   name = "state",
   properties = list(
-    value = class_any,
+    value = state_classes,
     type = state_classes,
     allow_null = new_property(
       class = class_logical,
