@@ -93,5 +93,6 @@ abort_not_defined <- function(name) {
 }
 
 abort_type_mismatch <- function(name, expected, actual) {
-  stop(sprintf("Invalid type for '%s': expected <%s>, got <%s>.", name, expected$class, actual), call. = FALSE)
+  expected_class <- if (S7_inherits(expected)) expected@name else expected$class
+  stop(sprintf("Invalid type for '%s': expected <%s>, got <%s>.", name, expected_class, actual), call. = FALSE)
 }
