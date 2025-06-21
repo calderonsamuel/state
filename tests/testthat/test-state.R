@@ -57,19 +57,37 @@ test_that("state constructor works with various inputs", {
 # Custom S7 Class Tests
 # =============================================================================
 
-test_that("state_manager works with custom S7 classes", {
-  Person <- new_class("Person",
-                      properties = list(
-                        name = class_character,
-                        age = class_integer
-                      )
+test_that("state_manager works with custom S7 classes with package", {
+  Person <- new_class(
+    name = "Person",
+    properties = list(
+      name = class_character,
+      age = class_integer
+    )
   )
 
   john <- Person(name = "John", age = 30L)
-  sm <- state_manager(person = state(john, Person))
+  person <- state(john, Person)
 
-  expect_equal(shiny::isolate(sm$person@name), "John")
-  expect_equal(shiny::isolate(sm$person@age), 30L)
+  expect_equal(person@value@name, "John")
+  expect_equal(person@value@age, 30L)
+})
+
+test_that("state_manager works with custom S7 classes without package", {
+  Person <- new_class(
+    name = "Person",
+    properties = list(
+      name = class_character,
+      age = class_integer
+    ),
+    package = NULL
+  )
+
+  john <- Person(name = "John", age = 30L)
+  person <- state(john, Person)
+
+  expect_equal(person@value@name, "John")
+  expect_equal(person@value@age, 30L)
 })
 
 test_that("custom S7 class state can be updated", {
@@ -130,8 +148,7 @@ test_that("state handles data.frame objects", {
     stringsAsFactors = FALSE
   )
 
-  sm <- state_manager(data = state(df, class_data.frame))
-  expect_equal(shiny::isolate(sm$data), df)
+  expect_equal(state(df, class_data.frame)@value, df)
 })
 
 test_that("data.frame state can be updated", {

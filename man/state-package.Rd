@@ -2,11 +2,10 @@
 % Please edit documentation in R/state-package.R
 \docType{package}
 \name{state-package}
-\alias{state}
 \alias{state-package}
-\title{state: What the Package Does (One Line, Title Case)}
+\title{state: State Management for Reactive Contexts}
 \description{
-What the package does (one paragraph).
+Utilities to define typed reactive values for shiny applications.
 }
 \seealso{
 Useful links:
@@ -18,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com}
+\strong{Maintainer}: Samuel Calderon \email{samuel.calderon@uarm.pe}
 
 }
 \keyword{internal}
