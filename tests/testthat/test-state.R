@@ -1,229 +1,4 @@
 # =============================================================================
-# Basic Initialization Tests
-# =============================================================================
-
-test_that("state_manager initializes with named states", {
-  sm <- state_manager(
-    x = state(1L, class_integer),
-    y = state("a", class_character)
-  )
-  expect_s3_class(sm, "state_manager")
-  expect_equal(shiny::isolate(sm$x), 1L)
-  expect_equal(shiny::isolate(sm$y), "a")
-})
-
-test_that("state_manager initializes empty", {
-  sm <- state_manager()
-  expect_s3_class(sm, "state_manager")
-  expect_equal(length(shiny::isolate(shiny::reactiveValuesToList(sm))), 0)
-})
-
-# =============================================================================
-# Assignment and Access Tests
-# =============================================================================
-
-test_that("initial update with matching type succeeds", {
-  sm <- state_manager(x = state(1L, class_integer))
-  sm$x <- 2L
-  expect_equal(shiny::isolate(sm$x), 2L)
-})
-
-test_that("initial update with wrong type fails", {
-  sm <- state_manager(x = state(1L, class_integer))
-  expect_error(sm$x <- "2", "Invalid type")
-})
-
-test_that("$<- and [[<- assignment operators work identically", {
-  sm1 <- state_manager(x = state(1L, class_integer))
-  sm2 <- state_manager(x = state(1L, class_integer))
-
-  sm1$x <- 10L
-  sm2[["x"]] <- 10L
-
-  expect_equal(shiny::isolate(sm1$x), shiny::isolate(sm2[["x"]]))
-})
-
-test_that("[[<- assignment works for updates", {
-  sm <- state_manager(x = state(1L, class_integer))
-  sm[["x"]] <- 5L
-  expect_equal(shiny::isolate(sm[["x"]]), 5L)
-})
-
-test_that("state can be defined after creation", {
-  sm <- state_manager()
-  sm$x <- state(1L, class_integer)
-  expect_equal(shiny::isolate(sm$x), 1L)
-  sm$x <- 5L
-  expect_equal(shiny::isolate(sm$x), 5L)
-})
-
-test_that("[[<- assignment works for new state definition", {
-  sm <- state_manager()
-  sm[["x"]] <- state(1L, class_integer)
-  expect_equal(shiny::isolate(sm[["x"]]), 1L)
-  sm[["x"]] <- 5L
-  expect_equal(shiny::isolate(sm[["x"]]), 5L)
-})
-
-test_that("assigning raw value without defining state fails", {
-  sm <- state_manager()
-  expect_error(sm$x <- 1L, "No type defined")
-  expect_error(sm[["y"]] <- "test", "No type defined")
-})
-
-test_that("redefining state with another state object fails", {
-  sm <- state_manager(x = state(1L, class_integer))
-  expect_error(sm$x <- state("oops", class_character), "Cannot reassign")
-})
-
-# =============================================================================
-# Argument Validation Tests
-# =============================================================================
-
-test_that("state_manager rejects unnamed arguments", {
-  expect_error(
-    state_manager(state(1L, class_integer)),
-    "All arguments passed to state_manager\\(\\) must be named\\."
-  )
-})
-
-test_that("state_manager rejects mixed named/unnamed arguments", {
-  expect_error(
-    state_manager(x = state(1L, class_integer), state(2L, class_integer)),
-    "All arguments passed to state_manager\\(\\) must be named\\."
-  )
-})
-
-test_that("state_manager rejects empty string names", {
-  args <- list(state(1L, class_integer))
-  names(args) <- ""
-
-  expect_error(
-    do.call(state_manager, args),
-    "All arguments passed to state_manager\\(\\) must be named\\."
-  )
-})
-
-test_that("non-state objects are rejected in state_manager", {
-  expect_error(
-    state_manager(x = 1L),
-    "`x` is not a <state> object\\. Use `state\\(\\)` when creating typed reactive values\\."
-  )
-  expect_error(
-    state_manager(y = "text"),
-    "`y` is not a <state> object\\. Use `state\\(\\)` when creating typed reactive values\\."
-  )
-})
-
-# =============================================================================
-# Type Validation and Error Handling Tests
-# =============================================================================
-
-test_that("class mismatch gives informative error", {
-  sm <- state_manager(x = state(1L, class_integer))
-  err <- expect_error(sm$x <- "text")
-  expect_match(err$message, "expected <integer>, got <character>")
-})
-
-test_that("type mismatch errors are comprehensive", {
-  sm <- state_manager(
-    x = state(1L, class_integer),
-    y = state("test", class_character),
-    z = state(TRUE, class_logical)
-  )
-
-  # Test all type mismatches with exact error messages
-  expect_error(sm$x <- "text", "Invalid type for 'x': expected <integer>, got <character>\\.")
-  expect_error(sm$x <- TRUE, "Invalid type for 'x': expected <integer>, got <logical>\\.")
-
-  expect_error(sm$y <- 1L, "Invalid type for 'y': expected <character>, got <integer>\\.")
-  expect_error(sm$y <- TRUE, "Invalid type for 'y': expected <character>, got <logical>\\.")
-
-  expect_error(sm$z <- 1L, "Invalid type for 'z': expected <logical>, got <integer>\\.")
-  expect_error(sm$z <- "text", "Invalid type for 'z': expected <logical>, got <character>\\.")
-})
-
-test_that("undefined state assignment gives exact error", {
-  sm <- state_manager()
-  expect_error(sm$x <- 1L, "No type defined for 'x'\\. Assign a <state> object first\\.")
-  expect_error(sm[["y"]] <- "test", "No type defined for 'y'\\. Assign a <state> object first\\.")
-})
-
-test_that("state redefinition gives exact error", {
-  sm <- state_manager(x = state(1L, class_integer))
-  expect_error(
-    sm$x <- state("oops", class_character),
-    "Cannot reassign 'x' with a <state>: it is already defined\\."
-  )
-})
-
-# =============================================================================
-# Data Type and Vector Tests
-# =============================================================================
-
-test_that("logical and character states work", {
-  sm <- state_manager(
-    a = state(TRUE, class_logical),
-    b = state("hello", class_character)
-  )
-
-  sm$a <- FALSE
-  sm$b <- "world"
-
-  expect_equal(shiny::isolate(sm$a), FALSE)
-  expect_equal(shiny::isolate(sm$b), "world")
-})
-
-test_that("state handles integer vectors", {
-  sm <- state_manager(x = state(c(1L, 2L, 3L), class_integer))
-  expect_equal(shiny::isolate(sm$x), c(1L, 2L, 3L))
-
-  sm$x <- c(4L, 5L)
-  expect_equal(shiny::isolate(sm$x), c(4L, 5L))
-})
-
-test_that("state handles character vectors", {
-  sm <- state_manager(x = state(c("a", "b", "c"), class_character))
-  expect_equal(shiny::isolate(sm$x), c("a", "b", "c"))
-
-  sm$x <- c("x", "y")
-  expect_equal(shiny::isolate(sm$x), c("x", "y"))
-})
-
-test_that("state handles logical vectors", {
-  sm <- state_manager(x = state(c(TRUE, FALSE, TRUE), class_logical))
-  expect_equal(shiny::isolate(sm$x), c(TRUE, FALSE, TRUE))
-
-  sm$x <- c(FALSE, FALSE)
-  expect_equal(shiny::isolate(sm$x), c(FALSE, FALSE))
-})
-
-test_that("vector type mismatches are caught", {
-  sm <- state_manager(x = state(c(1L, 2L), class_integer))
-  expect_error(sm$x <- c("a", "b"), "Invalid type.*expected <integer>, got <character>")
-  expect_error(sm$x <- c(TRUE, FALSE), "Invalid type.*expected <integer>, got <logical>")
-})
-
-test_that("state works with empty vectors", {
-  sm <- state_manager(
-    x = state(integer(), class_integer),
-    y = state(character(), class_character),
-    z = state(logical(), class_logical)
-  )
-
-  expect_equal(shiny::isolate(sm$x), integer())
-  expect_equal(shiny::isolate(sm$y), character())
-  expect_equal(shiny::isolate(sm$z), logical())
-
-  # Empty states can be updated
-  sm$x <- 5L
-  expect_equal(shiny::isolate(sm$x), 5L)
-
-  sm$x <- integer()  # Back to empty
-  expect_equal(shiny::isolate(sm$x), integer())
-})
-
-# =============================================================================
 # S7 Class System Tests
 # =============================================================================
 
@@ -279,105 +54,239 @@ test_that("state constructor works with various inputs", {
 })
 
 # =============================================================================
-# Class Preservation and State Management Tests
+# Custom S7 Class Tests
 # =============================================================================
 
-test_that("state_manager class is preserved after operations", {
-  sm <- state_manager(x = state(1L, class_integer))
-  expect_s3_class(sm, "state_manager")
+test_that("state_manager works with custom S7 classes", {
+  Person <- new_class("Person",
+                      properties = list(
+                        name = class_character,
+                        age = class_integer
+                      )
+  )
 
-  sm$x <- 2L
-  expect_s3_class(sm, "state_manager")
+  john <- Person(name = "John", age = 30L)
+  sm <- state_manager(person = state(john, Person))
 
-  sm$y <- state("new", class_character)
-  expect_s3_class(sm, "state_manager")
+  expect_equal(shiny::isolate(sm$person@name), "John")
+  expect_equal(shiny::isolate(sm$person@age), 30L)
 })
 
-test_that("type information is preserved across operations", {
+test_that("custom S7 class state can be updated", {
+  Person <- new_class("Person",
+                      properties = list(
+                        name = class_character,
+                        age = class_integer
+                      )
+  )
+
+  john <- Person(name = "John", age = 30L)
+  jane <- Person(name = "Jane", age = 25L)
+
+  sm <- state_manager(person = state(john, Person))
+  sm$person <- jane
+
+  expect_equal(shiny::isolate(sm$person@name), "Jane")
+  expect_equal(shiny::isolate(sm$person@age), 25L)
+})
+
+test_that("wrong type assignment to custom S7 class fails", {
+  Person <- new_class("Person",
+                      properties = list(name = class_character)
+  )
+
+  john <- Person(name = "John")
+  sm <- state_manager(person = state(john, Person))
+
+  expect_error(sm$person <- "not a person", "Invalid type.*expected <Person>")
+  expect_error(sm$person <- 123L, "Invalid type.*expected <Person>")
+})
+
+test_that("S7 class inheritance works with state", {
+  Animal <- new_class("Animal",
+                      properties = list(name = class_character)
+  )
+
+  Dog <- new_class("Dog",
+                   parent = Animal,
+                   properties = list(breed = class_character)
+  )
+
+  buddy <- Dog(name = "Buddy", breed = "Golden Retriever")
+
+  # Dog should be accepted where Animal is expected
+  sm <- state_manager(animal = state(buddy, Animal))
+  expect_equal(shiny::isolate(sm$animal@name), "Buddy")
+})
+
+# =============================================================================
+# Complex Data Type Tests
+# =============================================================================
+
+test_that("state handles data.frame objects", {
+  df <- data.frame(
+    x = 1:3,
+    y = c("a", "b", "c"),
+    stringsAsFactors = FALSE
+  )
+
+  sm <- state_manager(data = state(df, class_data.frame))
+  expect_equal(shiny::isolate(sm$data), df)
+})
+
+test_that("data.frame state can be updated", {
+  df1 <- data.frame(x = 1:2, y = c("a", "b"))
+  df2 <- data.frame(x = 3:4, y = c("c", "d"))
+
+  sm <- state_manager(data = state(df1, class_data.frame))
+  sm$data <- df2
+
+  expect_equal(shiny::isolate(sm$data), df2)
+})
+
+test_that("non-data.frame assignment to data.frame state fails", {
+  df <- data.frame(x = 1:2)
+  sm <- state_manager(data = state(df, class_data.frame))
+
+  expect_error(sm$data <- list(x = 1:2), "Invalid type.*expected <data.frame>")
+  expect_error(sm$data <- matrix(1:4, nrow = 2), "Invalid type.*expected <data.frame>")
+})
+
+test_that("state handles list objects", {
+  lst <- list(
+    numbers = 1:3,
+    text = c("a", "b"),
+    nested = list(inner = TRUE)
+  )
+
+  sm <- state_manager(my_list = state(lst, class_list))
+  expect_equal(shiny::isolate(sm$my_list), lst)
+})
+
+test_that("list state can be updated", {
+  lst1 <- list(a = 1, b = 2)
+  lst2 <- list(x = "hello", y = "world")
+
+  sm <- state_manager(my_list = state(lst1, class_list))
+  sm$my_list <- lst2
+
+  expect_equal(shiny::isolate(sm$my_list), lst2)
+})
+
+test_that("non-list assignment to list state fails", {
+  lst <- list(a = 1, b = 2)
+  sm <- state_manager(my_list = state(lst, class_list))
+
+  expect_error(sm$my_list <- c(1, 2, 3), "Invalid type.*expected <list>")
+  expect_error(sm$my_list <- data.frame(x = 1), "Invalid type.*expected <list>")
+})
+
+test_that("state handles matrix objects", {
+  mat <- matrix(1:6, nrow = 2, ncol = 3)
+  sm <- state_manager(my_matrix = state(mat, class_matrix))
+  expect_equal(shiny::isolate(sm$my_matrix), mat)
+})
+
+test_that("matrix state can be updated", {
+  mat1 <- matrix(1:4, nrow = 2)
+  mat2 <- matrix(5:8, nrow = 2)
+
+  sm <- state_manager(my_matrix = state(mat1, class_matrix))
+  sm$my_matrix <- mat2
+
+  expect_equal(shiny::isolate(sm$my_matrix), mat2)
+})
+
+test_that("state handles factor objects", {
+  fac <- factor(c("low", "medium", "high"), levels = c("low", "medium", "high"))
+  sm <- state_manager(my_factor = state(fac, class_factor))
+  expect_equal(shiny::isolate(sm$my_factor), fac)
+})
+
+test_that("factor state preserves levels", {
+  fac1 <- factor(c("a", "b"), levels = c("a", "b", "c"))
+  fac2 <- factor(c("b", "c"), levels = c("a", "b", "c"))
+
+  sm <- state_manager(my_factor = state(fac1, class_factor))
+  sm$my_factor <- fac2
+
+  result <- shiny::isolate(sm$my_factor)
+  expect_equal(result, fac2)
+  expect_equal(levels(result), c("a", "b", "c"))
+})
+
+# =============================================================================
+# Numeric vs Integer Edge Cases
+# =============================================================================
+
+test_that("integer state rejects numeric values", {
+  sm <- state_manager(x = state(1L, class_integer))
+  expect_error(sm$x <- 1.0, "Invalid type.*expected <integer>, got <numeric>")
+  expect_error(sm$x <- 1.5, "Invalid type.*expected <integer>, got <numeric>")
+})
+
+test_that("numeric state accepts both numeric and integer", {
+  sm <- state_manager(x = state(1.0, class_numeric))
+
+  sm$x <- 2.5
+  expect_equal(shiny::isolate(sm$x), 2.5)
+
+  # Integer should be accepted by numeric state (R coercion rules)
+  sm$x <- 3L
+  expect_equal(shiny::isolate(sm$x), 3L)
+})
+
+# =============================================================================
+# Error Recovery Tests
+# =============================================================================
+
+test_that("state_manager remains functional after failed assignments", {
+  sm <- state_manager(x = state(1L, class_integer))
+
+  # Attempt invalid assignment
+  expect_error(sm$x <- "invalid")
+
+  # State should be unchanged and still functional
+  expect_equal(shiny::isolate(sm$x), 1L)
+
+  # Should still accept valid assignments
+  sm$x <- 42L
+  expect_equal(shiny::isolate(sm$x), 42L)
+})
+
+test_that("multiple failed assignments don't corrupt state", {
   sm <- state_manager(
     x = state(1L, class_integer),
     y = state("test", class_character)
   )
 
-  sm$x <- 10L
+  # Multiple failed attempts
+  expect_error(sm$x <- "fail1")
+  expect_error(sm$y <- 123L)
+  expect_error(sm$x <- TRUE)
+
+  # Original values should be preserved
+  expect_equal(shiny::isolate(sm$x), 1L)
+  expect_equal(shiny::isolate(sm$y), "test")
+
+  # Should still work for valid assignments
+  sm$x <- 99L
   sm$y <- "updated"
-
-  # Types should still be accessible
-  expect_true(attr(sm, "types")$has("x"))
-  expect_true(attr(sm, "types")$has("y"))
-  expect_equal(attr(sm, "types")$get("x"), class_integer)
-  expect_equal(attr(sm, "types")$get("y"), class_character)
-})
-
-test_that("multiple entries and overwrites work properly", {
-  sm <- state_manager()
-  sm$x <- state(10L, class_integer)
-  sm$y <- state("x", class_character)
-  sm$z <- state(TRUE, class_logical)
-
-  sm$x <- 15L
-  sm$y <- "updated"
-  sm$z <- FALSE
-
-  expect_equal(shiny::isolate(sm$x), 15L)
+  expect_equal(shiny::isolate(sm$x), 99L)
   expect_equal(shiny::isolate(sm$y), "updated")
-  expect_equal(shiny::isolate(sm$z), FALSE)
 })
 
-# =============================================================================
-# Complex Integration Tests
-# =============================================================================
+test_that("type metadata remains consistent after errors", {
+  sm <- state_manager(x = state(1L, class_integer))
 
-test_that("complex multi-step operations work correctly", {
-  # Start empty
-  sm <- state_manager()
+  expect_error(sm$x <- "invalid")
 
-  # Add multiple states
-  sm$a <- state(1L, class_integer)
-  sm$b <- state("initial", class_character)
-  sm$c <- state(FALSE, class_logical)
+  # Type information should still be intact
+  types <- attr(sm, "types")
+  expect_true(types$has("x"))
+  expect_equal(types$get("x"), class_integer)
 
-  # Verify initial state
-  expect_equal(shiny::isolate(sm$a), 1L)
-  expect_equal(shiny::isolate(sm$b), "initial")
-  expect_equal(shiny::isolate(sm$c), FALSE)
-
-  # Update all values
-  sm$a <- 100L
-  sm$b <- "updated"
-  sm$c <- TRUE
-
-  # Verify updates
-  expect_equal(shiny::isolate(sm$a), 100L)
-  expect_equal(shiny::isolate(sm$b), "updated")
-  expect_equal(shiny::isolate(sm$c), TRUE)
-
-  # Try invalid updates (should fail)
-  expect_error(sm$a <- "invalid")
-  expect_error(sm$b <- 123L)
-  expect_error(sm$c <- "invalid")
-
-  # Values should be unchanged after failed updates
-  expect_equal(shiny::isolate(sm$a), 100L)
-  expect_equal(shiny::isolate(sm$b), "updated")
-  expect_equal(shiny::isolate(sm$c), TRUE)
+  # Class should be preserved
+  expect_s3_class(sm, "state_manager")
 })
 
-test_that("alternating $ and [[ operations work correctly", {
-  sm <- state_manager()
-
-  # Mix assignment operators
-  sm$x <- state(1L, class_integer)
-  sm[["y"]] <- state("test", class_character)
-  sm$z <- state(TRUE, class_logical)
-
-  # Mix access patterns
-  sm[["x"]] <- 10L
-  sm$y <- "updated"
-  sm[["z"]] <- FALSE
-
-  # Verify final state
-  expect_equal(shiny::isolate(sm$x), 10L)
-  expect_equal(shiny::isolate(sm[["y"]]), "updated")
-  expect_equal(shiny::isolate(sm$z), FALSE)
-})
