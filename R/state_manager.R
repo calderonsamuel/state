@@ -44,7 +44,7 @@ state_manager <- function(...) {
 `[[<-.state_manager` <- `$<-.state_manager`
 
 check_is_state <- function(.value, .name) {
-  if (!inherits(.value, state)) {
+  if (!S7_inherits(.value, state)) {
     stop(sprintf("`%s` is not a <state> object. Use `state()` when creating typed reactive values.", .name))
   }
 }
