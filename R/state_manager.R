@@ -30,7 +30,7 @@ state_manager <- function(...) {
 `$<-.state_manager` <- function(x, name, value) {
   types <- attr(x, "types")
 
-  if (inherits(value, state)) {
+  if (S7_inherits(value, state)) {
     x <- set_new_state(x, name, value, types)
   } else {
     x <- update_existing_state(x, name, value, types)
