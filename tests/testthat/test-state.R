@@ -12,9 +12,9 @@ test_that("validator triggers inside state_manager construction", {
 
 test_that("state class validation works correctly", {
   # Valid states
-  expect_true(inherits(state(1L, class_integer), state))
-  expect_true(inherits(state("test", class_character), state))
-  expect_true(inherits(state(TRUE, class_logical), state))
+  expect_true(S7_inherits(state(1L, class_integer), state))
+  expect_true(S7_inherits(state("test", class_character), state))
+  expect_true(S7_inherits(state(TRUE, class_logical), state))
 
   # Invalid states trigger validator
   expect_error(state("text", class_integer), "`value` is not a <integer>")
