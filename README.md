@@ -16,6 +16,9 @@ coverage](https://codecov.io/gh/calderonsamuel/state/graph/badge.svg)](https://a
 
 The goal of state is to provide an alternative to
 `shiny::reactiveValues()` that includes type safety functionality.
+Create a type safe reactivaValues with `state_manager()` and initialize
+values with `state()`, where the first argument is the initial value and
+the second one is the expected S7 class.
 
 ## Installation
 
@@ -39,7 +42,7 @@ Create a state manager
 sm <- state_manager()
 ```
 
-Initialize a counter
+Initialize some state
 
 ``` r
 sm$counter <- state(0L, S7::class_integer)
@@ -50,6 +53,13 @@ It will error if you try to assign a different type
 ``` r
 sm$counter <- "new value"
 #> Error: Invalid type for 'counter': expected <integer>, got <character>.
+```
+
+Or if you try to initialize state without using `state()`
+
+``` r
+sm$new <- 0L
+#> Error: No type defined for 'new'. Assign a <state> object first.
 ```
 
 It will work if you assign a value of the expected class
@@ -63,4 +73,31 @@ You can use it as a typical reactiveValues object
 ``` r
 shiny::isolate(sm$counter)
 #> [1] 1
+```
+
+You can also use key S3 classes provided by the base packages
+
+``` r
+sm$df <- state(mtcars, S7::class_data.frame)
+sm$date <- state(as.Date("2025-01-01"), S7::class_Date)
+```
+
+Or provide your custom S7 classes
+
+``` r
+animal <- S7::new_class(
+  name = "animal",
+  properties = list(
+    n_legs = S7::class_integer
+  )
+)
+
+bird <- animal(n_legs = 2L)
+dog <- animal(n_legs = 4L)
+
+sm$my_animal <- state(bird, animal)
+sm$my_animal <- dog
+shiny::isolate(sm$my_animal)
+#> <animal>
+#>  @ n_legs: int 4
 ```
