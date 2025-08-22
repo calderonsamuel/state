@@ -2,6 +2,14 @@
 # S7 Class System Tests
 # =============================================================================
 
+test_that("base classes can be initialized", {
+  expect_no_error(state("a", class_character))
+  expect_no_error(state(TRUE, class_logical))
+  expect_no_error(state(1L, class_integer))
+  expect_no_error(state(1.0, class_double))
+  expect_no_error(state(list(), class_list))
+})
+
 test_that("invalid class gets caught by validator", {
   expect_error(state("a", class_integer), "not a <integer>")
 })
@@ -20,6 +28,7 @@ test_that("state class validation works correctly", {
   expect_error(state("text", class_integer), "`value` is not a <integer>")
   expect_error(state(1L, class_character), "`value` is not a <character>")
   expect_error(state("text", class_logical), "`value` is not a <logical>")
+  expect_error(state("text", class_double), "`value` is not a <double>")
 })
 
 test_that("state properties are accessible", {

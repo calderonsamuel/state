@@ -48,7 +48,8 @@ state <- new_class(
   ),
   validator = function(self) {
     class_name <- type_to_class_name(self@type)
-    if (inherits(self@value, class_name)) return(NULL)
+    if (inherits(self@value, class_name)) return()
+    if (identical(class_name, "double") && is.double(self@value)) return()
     sprintf("`value` is not a <%s> object", class_name)
   },
   package = "state"
