@@ -37,13 +37,6 @@ state <- new_class(
           "should be a class supported by S7"
         }
       }
-    ),
-    allow_null = new_property(
-      class = class_logical,
-      default = FALSE,
-      validator = function(value) {
-        if (length(value) != 1L || is.na(value)) "Should be TRUE or FALSE"
-      }
     )
   ),
   validator = function(self) {
