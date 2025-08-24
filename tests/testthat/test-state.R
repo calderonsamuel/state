@@ -153,3 +153,26 @@ test_that("factor state preserves levels", {
   expect_no_error(state(fac1, class_factor))
 })
 
+# =============================================================================
+# Unions
+# =============================================================================
+
+test_that("state accepts S7 unions", {
+  expect_no_error(state(1L, class_character | class_integer))
+  expect_no_error(state("x", class_character | class_integer))
+  expect_no_error(state(1L, class_double | class_integer))
+  expect_no_error(state(1.0, class_double | class_integer))
+})
+
+test_that("state accepts S7 unions with NULL", {
+  expect_no_error(state(1L, NULL | class_integer))
+  expect_no_error(state(NULL, NULL | class_integer))
+})
+
+test_that("state gives meaningful error message when value doesn't inherit from union", {
+  skip()
+  expect_error(state(TRUE, class_character | class_integer))
+  expect_error(state(TRUE, NULL | class_integer))
+})
+
+

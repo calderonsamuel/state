@@ -10,7 +10,20 @@ bundled_S3_definitions <- new_union(
 
 state_classes <- NULL | S7_object | bundled_S3_definitions | class_vector
 
+is_S7_union <- function(x) inherits(x, "S7_union")
+
+get_S7_union_class_names <- function(x) {
+  non_nulls <- Filter(Negate(is.null), x$classes)
+  vapply(non_nulls, function(.x) .x$class, character(1L))
+}
+
+S7_union_includes_NULL <- function(x) {
+  nulls <- Filter(is.null, x$classes)
+  length(nulls) > 0L
+}
+
 type_to_class_name <- function(type) {
+  if (is_S7_union(type)) return(get_S7_union_class_names(type))
   if (!S7_inherits(type)) return(type$class)
   if (is.null(type@package)) return(type@name)
 
@@ -23,7 +36,6 @@ type_to_class_name <- function(type) {
 #'
 #' @param value Initial value of the state
 #' @param type The expected class
-#' @param allow_null Is it allowed for the value to be NULL?
 #'
 #' @export
 state <- new_class(
@@ -33,7 +45,7 @@ state <- new_class(
     type = new_property(
       class = class_any,
       validator = function(value) {
-        if (!inherits(value, c("S7_object", "S7_S3_class", "S7_base_class"))) {
+        if (!inherits(value, c("S7_object", "S7_S3_class", "S7_base_class", "S7_union"))) {
           "should be a class supported by S7"
         }
       }
@@ -42,7 +54,8 @@ state <- new_class(
   validator = function(self) {
     class_name <- type_to_class_name(self@type)
     if (inherits(self@value, class_name)) return()
-    if (identical(class_name, "double") && is.double(self@value)) return()
+    if (("double" %in% class_name) && is.double(self@value)) return()
+    if (is_S7_union(self@type) && S7_union_includes_NULL(self@type)) return()
     sprintf("`value` is not a <%s> object", class_name)
   },
   package = "state"
