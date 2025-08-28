@@ -170,9 +170,8 @@ test_that("state accepts S7 unions with NULL", {
 })
 
 test_that("state gives meaningful error message when value doesn't inherit from union", {
-  skip()
-  expect_error(state(TRUE, class_character | class_integer))
-  expect_error(state(TRUE, NULL | class_integer))
+  expect_error(state(TRUE, class_character | class_integer), regexp = "`value` is not a <character> or <integer> object")
+  expect_error(state(TRUE, NULL | class_integer), regexp = "`value` is not a `NULL` or <integer> object")
 })
 
 
