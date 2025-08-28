@@ -85,6 +85,14 @@ sm$df <- state(mtcars, S7::class_data.frame)
 sm$date <- state(as.Date("2025-01-01"), S7::class_Date)
 ```
 
+Class unions are also supported
+
+```{r}
+sm$union_bundled <- state(1.0, S7::class_numeric)
+sm$union_custom <- state(1.0, S7::class_integer | S7::class_double)
+sm$union_null <- state(NULL, NULL | S7::class_character)
+```
+
 Or provide your custom S7 classes
 
 ```{r}
