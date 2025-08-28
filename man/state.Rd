@@ -4,14 +4,12 @@
 \alias{state}
 \title{State}
 \usage{
-state(value = NULL, type = NULL, allow_null = FALSE)
+state(value = NULL, type = NULL)
 }
 \arguments{
 \item{value}{Initial value of the state}
 
 \item{type}{The expected class}
-
-\item{allow_null}{Is it allowed for the value to be NULL?}
 }
 \description{
 A way of defining state for a shiny application. Alternative to \code{shiny::reactiveValues()}.
