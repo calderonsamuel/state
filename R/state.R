@@ -52,25 +52,30 @@ state <- new_class(
     )
   ),
   validator = function(self) {
-    class_name <- type_to_class_name(self@type)
+    class_name <- type_to_class_name(self@type) # potentialy multiple classes
+    value <- self@value
 
+    # Direct match
+    if (inherits(value, class_name)) return()
+
+    # Special case for double
+    if (("double" %in% class_name) && is.double(value)) return()
+
+    # Not a union, simple error
     if (!is_S7_union(self@type)) {
-      if (inherits(self@value, class_name)) return()
-      if (("double" %in% class_name) && is.double(self@value)) return()
       return(sprintf("`value` is not a <%s> object", class_name))
     }
 
-    if (inherits(self@value, class_name)) return()
-    if (("double" %in% class_name) && is.double(self@value)) return()
-
-    union_class_names <- paste0(sprintf("<%s>", class_name), collapse = " or ")
+    # Union logic, compute only here
+    union_class_names <- paste0("<", class_name, ">", collapse = " or ")
 
     if (S7_union_includes_NULL(self@type)) {
-      if (is.null(self@value)) return()
+      if (is.null(value)) return()
       return(sprintf("`value` is not a %s or %s object", "`NULL`", union_class_names))
     }
 
     return(sprintf("`value` is not a %s object", union_class_names))
   },
+
   package = "state"
 )
