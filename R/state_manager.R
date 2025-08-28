@@ -89,7 +89,7 @@ with_stripped_class <- function(x, f, original_class) {
 }
 
 abort_already_defined <- function(name) {
-  stop(sprintf("Cannot reassign '%s' with a <state>: it is already defined.", name), call. = FALSE)
+  stop(sprintf("Cannot reassign '%s' with a <state>. It is already defined.", name), call. = FALSE)
 }
 
 abort_not_defined <- function(name) {
@@ -97,6 +97,10 @@ abort_not_defined <- function(name) {
 }
 
 abort_type_mismatch <- function(name, expected, actual) {
-  expected_class <- type_to_class_name(expected)
-  stop(sprintf("Invalid type for '%s': expected <%s>, got <%s>.", name, expected_class, actual), call. = FALSE)
+  expected_class_name <- type_to_class_name(expected)
+  union_class_names <- paste0("<", expected_class_name, ">", collapse = " or ")
+  if (is_S7_union(expected) && S7_union_includes_NULL(expected)) {
+    union_class_names <- paste0("`NULL` or ", union_class_names)
+  }
+  stop(sprintf("Invalid type for '%s': expected %s, got <%s>.", name, union_class_names, actual), call. = FALSE)
 }

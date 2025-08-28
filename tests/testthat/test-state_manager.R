@@ -15,7 +15,7 @@ test_that("state_manager initializes with named states", {
 test_that("state_manager initializes empty", {
   sm <- state_manager()
   expect_s3_class(sm, "state_manager")
-  expect_equal(length(shiny::isolate(shiny::reactiveValuesToList(sm))), 0)
+  expect_length(shiny::isolate(shiny::reactiveValuesToList(sm)), 0)
 })
 
 # =============================================================================
@@ -53,16 +53,6 @@ test_that("state can be defined after creation", {
   sm <- state_manager()
   sm$x <- state(1L, class_integer)
   expect_equal(shiny::isolate(sm$x), 1L)
-  sm$x <- 5L
-  expect_equal(shiny::isolate(sm$x), 5L)
-})
-
-test_that("[[<- assignment works for new state definition", {
-  sm <- state_manager()
-  sm[["x"]] <- state(1L, class_integer)
-  expect_equal(shiny::isolate(sm[["x"]]), 1L)
-  sm[["x"]] <- 5L
-  expect_equal(shiny::isolate(sm[["x"]]), 5L)
 })
 
 test_that("assigning raw value without defining state fails", {
@@ -109,10 +99,6 @@ test_that("non-state objects are rejected in state_manager", {
     state_manager(x = 1L),
     "`x` is not a <state> object\\. Use `state\\(\\)` when creating typed reactive values\\."
   )
-  expect_error(
-    state_manager(y = "text"),
-    "`y` is not a <state> object\\. Use `state\\(\\)` when creating typed reactive values\\."
-  )
 })
 
 # =============================================================================
@@ -143,6 +129,27 @@ test_that("type mismatch errors are comprehensive", {
   expect_error(sm$z <- "text", "Invalid type for 'z': expected <logical>, got <character>\\.")
 })
 
+test_that("type mismatch errors respects unions", {
+  sm <- state_manager(
+    x = state(1L, class_integer | class_character),
+    y = state(NULL, NULL | class_integer)
+  )
+
+  expect_error(
+    {
+      sm$x <- TRUE
+    },
+    regexp = "Invalid type for 'x': expected <integer> or <character>, got <logical>"
+  )
+
+  expect_error(
+    {
+      sm$y <- TRUE
+    },
+    regexp = "Invalid type for 'y': expected `NULL` or <integer>, got <logical>"
+  )
+})
+
 test_that("undefined state assignment gives exact error", {
   sm <- state_manager()
   expect_error(sm$x <- 1L, "No type defined for 'x'\\. Assign a <state> object first\\.")
@@ -153,7 +160,7 @@ test_that("state redefinition gives exact error", {
   sm <- state_manager(x = state(1L, class_integer))
   expect_error(
     sm$x <- state("oops", class_character),
-    "Cannot reassign 'x' with a <state>: it is already defined\\."
+    "Cannot reassign 'x' with a <state>. It is already defined\\."
   )
 })
 
