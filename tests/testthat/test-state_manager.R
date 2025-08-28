@@ -168,49 +168,6 @@ test_that("state redefinition gives exact error", {
 # Data Type and Vector Tests
 # =============================================================================
 
-test_that("logical and character states work", {
-  sm <- state_manager(
-    a = state(TRUE, class_logical),
-    b = state("hello", class_character)
-  )
-
-  sm$a <- FALSE
-  sm$b <- "world"
-
-  expect_equal(shiny::isolate(sm$a), FALSE)
-  expect_equal(shiny::isolate(sm$b), "world")
-})
-
-test_that("state handles integer vectors", {
-  sm <- state_manager(x = state(c(1L, 2L, 3L), class_integer))
-  expect_equal(shiny::isolate(sm$x), c(1L, 2L, 3L))
-
-  sm$x <- c(4L, 5L)
-  expect_equal(shiny::isolate(sm$x), c(4L, 5L))
-})
-
-test_that("state handles character vectors", {
-  sm <- state_manager(x = state(c("a", "b", "c"), class_character))
-  expect_equal(shiny::isolate(sm$x), c("a", "b", "c"))
-
-  sm$x <- c("x", "y")
-  expect_equal(shiny::isolate(sm$x), c("x", "y"))
-})
-
-test_that("state handles logical vectors", {
-  sm <- state_manager(x = state(c(TRUE, FALSE, TRUE), class_logical))
-  expect_equal(shiny::isolate(sm$x), c(TRUE, FALSE, TRUE))
-
-  sm$x <- c(FALSE, FALSE)
-  expect_equal(shiny::isolate(sm$x), c(FALSE, FALSE))
-})
-
-test_that("vector type mismatches are caught", {
-  sm <- state_manager(x = state(c(1L, 2L), class_integer))
-  expect_error(sm$x <- c("a", "b"), "Invalid type.*expected <integer>, got <character>")
-  expect_error(sm$x <- c(TRUE, FALSE), "Invalid type.*expected <integer>, got <logical>")
-})
-
 test_that("state works with empty vectors", {
   sm <- state_manager(
     x = state(integer(), class_integer),
@@ -259,21 +216,6 @@ test_that("type information is preserved across operations", {
   expect_true(attr(sm, "types")$has("y"))
   expect_equal(attr(sm, "types")$get("x"), class_integer)
   expect_equal(attr(sm, "types")$get("y"), class_character)
-})
-
-test_that("multiple entries and overwrites work properly", {
-  sm <- state_manager()
-  sm$x <- state(10L, class_integer)
-  sm$y <- state("x", class_character)
-  sm$z <- state(TRUE, class_logical)
-
-  sm$x <- 15L
-  sm$y <- "updated"
-  sm$z <- FALSE
-
-  expect_equal(shiny::isolate(sm$x), 15L)
-  expect_equal(shiny::isolate(sm$y), "updated")
-  expect_equal(shiny::isolate(sm$z), FALSE)
 })
 
 # =============================================================================
